@@ -11,6 +11,8 @@
 A complete, Windows-first local observability stack for [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/) Python agents. Emits OpenTelemetry traces, GenAI metrics, and logs to a locally hosted observability stack without Docker, Kubernetes, or cloud dependencies.
 
 > 📸 **Visual Showcase & Demo Video**: Check out [OBSERVABILITY_GALLERY.md](OBSERVABILITY_GALLERY.md) for live screenshots of Grafana dashboards, Jaeger waterfalls, Prometheus metrics, and an animated walkthrough of the ADK Dev Web UI with prompts and responses!
+>
+> 🚀 **Enterprise Edition (Coming Soon)**: Multi-tenant Kubernetes & Helm deployment, centralized OpenTelemetry gateway with mTLS, Google Cloud Vertex AI Agent Engine hybrid integration, and automated PagerDuty/Slack SLA alerts.
 
 ---
 
@@ -328,6 +330,17 @@ Validates:
 | `Port 16686 or 3000 already in use` | Another dev server is running | Stop the existing service or let `start-stack.ps1` detect and reuse the active port. |
 | `Grafana Infinity plugin missing` | First time running Grafana | `start-stack.ps1` attempts auto-install via `grafana-cli plugins install yesoreyeram-infinity-datasource`. Run it manually if needed. |
 | `Grafana Jaeger Search empty in v2` | Jaeger v2 internal search API changes | Use the provisioned `adk-traces` dashboard which queries Jaeger v2 `/api/v3/traces` directly via the Infinity datasource. |
+
+---
+
+## 🏢 Enterprise Edition: Roadmap (Coming Soon)
+
+We are actively working on scaling this local developer stack into distributed production enterprise environments:
+
+- ☸️ **Kubernetes & Helm Charts**: Automated deployment recipes and horizontal pod autoscaling for high-throughput multi-agent clusters.
+- 🔐 **Centralized OpenTelemetry Gateway with mTLS**: Secure, high-performance gRPC ingestion and traffic shaping across multi-cluster agent deployments.
+- ☁️ **Hybrid Cloud / Vertex AI Agent Engine**: Telemetry connector bridging local Collector pipelines with Google Cloud Trace, Cloud Monitoring, and BigQuery cost analytics.
+- 🛡️ **Enterprise Security & Alerting**: OIDC/SAML authentication, role-based Grafana access, and automated Slack/PagerDuty Alertmanager rules for token budget overruns and latency SLA violations.
 
 ---
 
