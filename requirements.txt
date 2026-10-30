@@ -1,0 +1,26 @@
+# ==============================================================================
+# adk-otel: Python Dependencies
+# Supported Python Versions: Python 3.12, 3.13, 3.14
+# ==============================================================================
+
+# Google Agent Development Kit (ADK)
+google-adk>=1.23.0
+
+# Multi-LLM provider abstraction (GitHub Copilot, Ollama, OpenAI, Anthropic, Groq)
+litellm>=1.40.0
+
+# Model Context Protocol support (compatible with LiteLLM)
+mcp>=1.2.0
+
+# OpenTelemetry SDK and HTTP protobuf exporter
+opentelemetry-api>=1.25.0
+opentelemetry-sdk>=1.25.0
+opentelemetry-exporter-otlp-proto-http>=1.25.0
+opentelemetry-semantic-conventions>=0.46b0
+opentelemetry-instrumentation-google-genai>=1.3b0
+
+# Environment variables loading (.env)
+python-dotenv>=1.0.0
+
+# Native OS certificate store injection for enterprise TLS inspection
+truststore>=0.9.0

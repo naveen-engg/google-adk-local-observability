@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: "ADK Observability Dashboards"
+    orgId: 1
+    folder: "ADK Observability"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 5
+    allowUiUpdates: true
+    options:
+      path: ./grafana/dashboards
+      foldersFromFilesStructure: false
