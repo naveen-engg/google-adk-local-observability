@@ -13,10 +13,32 @@ import socket
 import time
 import urllib.parse
 import urllib.request
+from functools import cached_property
 from typing import Any, Union
 from google.adk.agents import Agent
+from google.adk.models.google_llm import Gemini
+from google.genai import Client, types
 
 logger = logging.getLogger("ops_agent")
+
+
+class VertexGlobalGemini(Gemini):
+  """Gemini LLM wrapper that supports Vertex AI global endpoint inside regional Agent Engine."""
+
+  @cached_property
+  def api_client(self) -> Client:
+    vertex_loc = os.environ.get("ADK_VERTEX_LOCATION")
+    if vertex_loc:
+      return Client(
+          vertexai=True,
+          project=os.environ.get("GOOGLE_CLOUD_PROJECT"),
+          location=vertex_loc,
+          http_options=types.HttpOptions(
+              headers=self._tracking_headers(),
+              retry_options=self.retry_options,
+          ),
+      )
+    return super().api_client
 
 
 def greet_user(name: str) -> dict[str, str]:
@@ -192,6 +214,13 @@ def resolve_model(model_name: str | None = None) -> Union[str, Any]:
   ).strip()
 
   if effective_name.startswith("gemini-"):
+    if os.environ.get("ADK_VERTEX_LOCATION"):
+      logger.debug(
+          "Using VertexGlobalGemini (%s) for model: %s",
+          os.environ.get("ADK_VERTEX_LOCATION"),
+          effective_name,
+      )
+      return VertexGlobalGemini(model=effective_name)
     logger.debug("Using native Google GenAI model: %s", effective_name)
     return effective_name
 
