@@ -63,6 +63,11 @@ def main() -> None:
       "--update",
       help="Update an existing AgentEngine resource name in place instead of creating a new one",
   )
+  parser.add_argument(
+      "--delete",
+      action="store_true",
+      help="Delete all deployed AgentEngine instances in the project/region to stop billing",
+  )
   args = parser.parse_args()
 
   # Force Vertex AI backend with global Gemini endpoint while hosting Agent Engine in args.location
@@ -85,6 +90,13 @@ def main() -> None:
       location=args.location,
       staging_bucket=args.staging_bucket,
   )
+
+  if args.delete:
+    for engine in agent_engines.list():
+      print(f"Deleting AgentEngine: {engine.resource_name} ...")
+      agent_engines.delete(engine.resource_name, force=True)
+    print("All AgentEngine instances deleted.")
+    return
 
   # Wrap OpsAgent in AdkApp with Cloud Trace telemetry enabled
   adk_app = agent_engines.AdkApp(
