@@ -333,14 +333,14 @@ Validates:
 
 ---
 
-## 🏢 Enterprise Edition: Roadmap (Coming Soon)
+## 🏢 Enterprise Edition: GCP Deployment Guides (`feat/enterprise-edition`)
 
-We are actively working on scaling this local developer stack into distributed production enterprise environments:
+We are scaling this local developer stack into distributed production **Google Cloud Platform (GCP)** environments. Check out the dedicated architecture and step-by-step implementation guides in this branch:
 
-- ☸️ **Kubernetes & Helm Charts**: Automated deployment recipes and horizontal pod autoscaling for high-throughput multi-agent clusters.
-- 🔐 **Centralized OpenTelemetry Gateway with mTLS**: Secure, high-performance gRPC ingestion and traffic shaping across multi-cluster agent deployments.
-- ☁️ **Hybrid Cloud / Vertex AI Agent Engine**: Telemetry connector bridging local Collector pipelines with Google Cloud Trace, Cloud Monitoring, and BigQuery cost analytics.
-- 🛡️ **Enterprise Security & Alerting**: OIDC/SAML authentication, role-based Grafana access, and automated Slack/PagerDuty Alertmanager rules for token budget overruns and latency SLA violations.
+- 📘 **[Enterprise GCP Deployment Overview (`ENTERPRISE_GCP_DEPLOYMENT.md`)](./ENTERPRISE_GCP_DEPLOYMENT.md)** — Architecture comparison, required GCP APIs, and least-privilege IAM roles.
+- 🧠 **[Option 1: Vertex AI Agent Engine / Reasoning Engine (`deploy/agent_engine/README.md`)](./deploy/agent_engine/README.md)** — Managed ADK runtime (`AdkApp`) with native Cloud Trace & Cloud Monitoring OpenTelemetry exporters.
+- 🚀 **[Option 2: Google Cloud Run + OpenTelemetry Collector Sidecar (`deploy/cloud_run/README.md`)](./deploy/cloud_run/README.md)** — Serverless multi-container deployment with `otelcol-google` sidecar, PII prompt redaction, and Managed Service for Prometheus (GMP).
+- 🛡️ **Enterprise Security & FinOps**: Workload Identity IAM authentication, Secret Manager config mounting, Identity-Aware Proxy (IAP), and BigQuery token chargeback analytics.
 
 ---
 
