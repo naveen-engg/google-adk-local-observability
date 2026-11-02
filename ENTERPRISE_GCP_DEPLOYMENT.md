@@ -108,8 +108,9 @@ Choose your deployment pattern below for full step-by-step instructions, configu
 
 ## Live GCP Enterprise Observability Showcase (`adk-enterprise-observability`)
 
-### 1. Deployed Vertex AI Agent Engine (`ops-agent-sre-copilot`)
-![Vertex AI Agent Engine Deployment](./docs/media/gcp_vertex_agent_engine.png)
+### 1. Google Cloud Managed Service for Prometheus — All 7 Native `gen_ai.*/histogram` Metrics
+Emitted automatically by `google-adk[otel]>=2.13.0` (`google.adk.telemetry`) via `https://telemetry.googleapis.com/v1/metrics`:
+![GCP Metrics Management 7 GenAI Histograms](./docs/media/gcp_metrics_management_7_histograms.png)
 
 ### 2. GCP Cloud Monitoring — GenAI Token Usage & Latency Dashboard
 Provisioned via [`deploy/gcp_dashboards/adk-genai-gcp-dashboard.json`](./deploy/gcp_dashboards/adk-genai-gcp-dashboard.json):

@@ -61,16 +61,16 @@
           "xyChart": {
             "dataSets": [
               {
-                "plotType": "LINE",
+                "plotType": "STACKED_BAR",
                 "targetAxis": "Y1",
-                "legendTemplate": "p95 (${metric.labels.gen_ai.request.model})",
+                "legendTemplate": "Mean (${metric.labels.gen_ai.request.model})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
                     "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.client.operation.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
+                      "crossSeriesReducer": "REDUCE_MEAN",
                       "groupByFields": [
                         "metric.label.\"gen_ai.request.model\""
                       ]
@@ -81,14 +81,14 @@
               {
                 "plotType": "LINE",
                 "targetAxis": "Y1",
-                "legendTemplate": "Mean (${metric.labels.gen_ai.request.model})",
+                "legendTemplate": "p95 (${metric.labels.gen_ai.request.model})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
                     "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.client.operation.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
                       "groupByFields": [
                         "metric.label.\"gen_ai.request.model\""
                       ]
@@ -148,16 +148,16 @@
           "xyChart": {
             "dataSets": [
               {
-                "plotType": "LINE",
+                "plotType": "STACKED_BAR",
                 "targetAxis": "Y1",
-                "legendTemplate": "p95 (${metric.labels.gen_ai.agent.name})",
+                "legendTemplate": "Mean (${metric.labels.gen_ai.agent.name})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
                     "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_agent.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
+                      "crossSeriesReducer": "REDUCE_MEAN",
                       "groupByFields": [
                         "metric.label.\"gen_ai.agent.name\""
                       ]
@@ -168,14 +168,14 @@
               {
                 "plotType": "LINE",
                 "targetAxis": "Y1",
-                "legendTemplate": "Mean (${metric.labels.gen_ai.agent.name})",
+                "legendTemplate": "p95 (${metric.labels.gen_ai.agent.name})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
                     "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_agent.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
                       "groupByFields": [
                         "metric.label.\"gen_ai.agent.name\""
                       ]
@@ -201,7 +201,7 @@
           "xyChart": {
             "dataSets": [
               {
-                "plotType": "LINE",
+                "plotType": "STACKED_BAR",
                 "targetAxis": "Y1",
                 "legendTemplate": "Inference Calls (${metric.labels.gen_ai.agent.name})",
                 "timeSeriesQuery": {
@@ -219,7 +219,7 @@
                 }
               },
               {
-                "plotType": "LINE",
+                "plotType": "STACKED_BAR",
                 "targetAxis": "Y1",
                 "legendTemplate": "Tool Calls (${metric.labels.gen_ai.agent.name})",
                 "timeSeriesQuery": {
@@ -254,16 +254,16 @@
           "xyChart": {
             "dataSets": [
               {
-                "plotType": "LINE",
+                "plotType": "STACKED_BAR",
                 "targetAxis": "Y1",
-                "legendTemplate": "p95 (${metric.labels.gen_ai.workflow.name})",
+                "legendTemplate": "Mean (${metric.labels.gen_ai.workflow.name})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
                     "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_workflow.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
+                      "crossSeriesReducer": "REDUCE_MEAN",
                       "groupByFields": [
                         "metric.label.\"gen_ai.workflow.name\""
                       ]
@@ -274,14 +274,14 @@
               {
                 "plotType": "LINE",
                 "targetAxis": "Y1",
-                "legendTemplate": "Mean (${metric.labels.gen_ai.workflow.name})",
+                "legendTemplate": "p95 (${metric.labels.gen_ai.workflow.name})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
                     "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_workflow.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
                       "groupByFields": [
                         "metric.label.\"gen_ai.workflow.name\""
                       ]
