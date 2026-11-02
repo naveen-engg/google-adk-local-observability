@@ -44,6 +44,7 @@ gcloud config set project "${PROJECT_ID}"
 # Enable core Vertex AI, Observability, and Security APIs
 gcloud services enable \
   aiplatform.googleapis.com \
+  telemetry.googleapis.com \
   cloudtrace.googleapis.com \
   monitoring.googleapis.com \
   logging.googleapis.com \
@@ -80,10 +81,25 @@ Both options replace static `.env` Gemini API keys with **Workload Identity / De
 Choose your deployment pattern below for full step-by-step instructions, configuration files, and verification commands:
 
 1. **[Option 1: Deploy to Vertex AI Agent Engine (Reasoning Engine)](./deploy/agent_engine/README.md)**
-   - Uses `vertexai.preview.reasoning_engines.AdkApp`
+   - Uses `vertexai.agent_engines.AdkApp`
    - Zero Dockerfiles required
-   - Native OpenTelemetry integration with Google Cloud Trace & Cloud Monitoring
+   - Native OpenTelemetry integration with Google Cloud Trace & Cloud Monitoring (`AGENT_ENGINE_TELEMETRY=true`)
 2. **[Option 2: Deploy to Google Cloud Run with OpenTelemetry Collector Sidecar](./deploy/cloud_run/README.md)**
    - Uses Cloud Run multi-container sidecar architecture
    - Runs `otelcol-google` sidecar with PII prompt redaction (`redaction` processor) and `sum` connector
    - Exports directly to Google Cloud Managed Service for Prometheus (GMP) and Cloud Trace
+
+---
+
+## Live GCP Enterprise Observability Showcase (`adk-enterprise-observability`)
+
+### 1. Deployed Vertex AI Agent Engine (`ops-agent-sre-copilot`)
+![Vertex AI Agent Engine Deployment](./docs/media/gcp_vertex_agent_engine.png)
+
+### 2. GCP Cloud Monitoring — GenAI Token Usage & Latency Dashboard
+Provisioned via [`deploy/gcp_dashboards/adk-genai-gcp-dashboard.json`](./deploy/gcp_dashboards/adk-genai-gcp-dashboard.json):
+![GCP Cloud Monitoring GenAI Dashboard](./docs/media/gcp_monitoring_genai_dashboard.png)
+
+### 3. GCP Cloud Trace Waterfall & Correlated Logs Dashboard
+Provisioned via [`deploy/gcp_dashboards/adk-traces-gcp-dashboard.json`](./deploy/gcp_dashboards/adk-traces-gcp-dashboard.json):
+![GCP Cloud Trace & Monitoring Dashboard](./docs/media/gcp_monitoring_traces_dashboard.png)
