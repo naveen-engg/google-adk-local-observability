@@ -1,25 +1,15 @@
 {
-  "metadata": {
-    "configurationVersions": [7],
-    "clusterVersion": "1.300.0"
-  },
   "dashboardMetadata": {
     "name": "Google ADK — GenAI Metrics & Token Analytics (OpenTelemetry)",
     "shared": true,
+    "owner": "naveen.kr@zohomail.com",
     "preset": false,
     "tags": [
       "google-adk",
       "genai",
       "opentelemetry",
       "llm-observability"
-    ],
-    "DynamicFilters": {
-      "filters": [
-        "CUSTOM_DIMENSION:gen_ai.request.model",
-        "CUSTOM_DIMENSION:gen_ai.agent.name",
-        "CUSTOM_DIMENSION:gen_ai.tool.name"
-      ]
-    }
+    ]
   },
   "tiles": [
     {
@@ -29,10 +19,10 @@
       "bounds": {
         "top": 0,
         "left": 0,
-        "width": 1710,
+        "width": 1672,
         "height": 114
       },
-      " tileFilter": {},
+      "tileFilter": {},
       "markdown": "## Google ADK Enterprise Observability — OpenTelemetry GenAI Metrics (Dynatrace)\nVisualizes all **7 native ADK OpenTelemetry GenAI Histogram Metrics** (`gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, `gen_ai.execute_tool.duration`, `gen_ai.invoke_agent.duration`, `gen_ai.invoke_agent.inference_calls`, `gen_ai.invoke_agent.tool_calls`, `gen_ai.invoke_workflow.duration`) ingested directly via Dynatrace OTLP HTTP API (`/api/v2/otlp/v1/metrics`) with credentials fetched at runtime from **Google Cloud Secret Manager**."
     },
     {
@@ -42,7 +32,7 @@
       "bounds": {
         "top": 114,
         "left": 0,
-        "width": 855,
+        "width": 836,
         "height": 304
       },
       "tileFilter": {},
@@ -51,7 +41,7 @@
         {
           "id": "A",
           "metric": "gen_ai.client.token.usage",
-          "spaceAggregation": "SUM",
+          "spaceAggregation": "AVG",
           "timeAggregation": "DEFAULT",
           "splitBy": [
             "gen_ai.token.type",
@@ -96,8 +86,8 @@
       "configured": true,
       "bounds": {
         "top": 114,
-        "left": 855,
-        "width": 855,
+        "left": 836,
+        "width": 836,
         "height": 304
       },
       "tileFilter": {},
@@ -169,7 +159,7 @@
       "bounds": {
         "top": 418,
         "left": 0,
-        "width": 855,
+        "width": 836,
         "height": 304
       },
       "tileFilter": {},
@@ -223,8 +213,8 @@
       "configured": true,
       "bounds": {
         "top": 418,
-        "left": 855,
-        "width": 855,
+        "left": 836,
+        "width": 836,
         "height": 304
       },
       "tileFilter": {},
@@ -295,7 +285,7 @@
       "bounds": {
         "top": 722,
         "left": 0,
-        "width": 855,
+        "width": 836,
         "height": 304
       },
       "tileFilter": {},
@@ -304,7 +294,7 @@
         {
           "id": "A",
           "metric": "gen_ai.invoke_agent.inference_calls",
-          "spaceAggregation": "SUM",
+          "spaceAggregation": "AVG",
           "timeAggregation": "DEFAULT",
           "splitBy": [
             "gen_ai.agent.name"
@@ -314,7 +304,7 @@
         {
           "id": "B",
           "metric": "gen_ai.invoke_agent.tool_calls",
-          "spaceAggregation": "SUM",
+          "spaceAggregation": "AVG",
           "timeAggregation": "DEFAULT",
           "splitBy": [
             "gen_ai.agent.name"
@@ -365,8 +355,8 @@
       "configured": true,
       "bounds": {
         "top": 722,
-        "left": 855,
-        "width": 855,
+        "left": 836,
+        "width": 836,
         "height": 304
       },
       "tileFilter": {},
