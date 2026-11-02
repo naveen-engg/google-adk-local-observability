@@ -9,9 +9,9 @@
         "xPos": 0,
         "yPos": 0,
         "widget": {
-          "title": "Google ADK Enterprise Observability — OpenTelemetry GenAI Metrics",
+          "title": "Google ADK Enterprise Observability — Managed Service for Prometheus GenAI Histograms",
           "text": {
-            "content": "Visualizes standard **OpenTelemetry GenAI Semantic Convention Metrics** (`workload.googleapis.com/gen_ai.client.token.usage` and `workload.googleapis.com/gen_ai.client.operation.duration`) emitted automatically by `opentelemetry-instrumentation-google-genai` and `google.adk.telemetry.google_cloud.get_gcp_exporters` when `AGENT_ENGINE_TELEMETRY=true` and `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai`.\n\n* **Trace Waterfall**: [Open Cloud Trace Explorer](https://console.cloud.google.com/traces/explorer?project=adk-enterprise-observability) | **Metrics Explorer**: [Open Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?project=adk-enterprise-observability)",
+            "content": "Visualizes all **7 native ADK OpenTelemetry GenAI Histogram Metrics** (`prometheus.googleapis.com/gen_ai.*/histogram`) ingested via Google Cloud Telemetry API (`telemetry.googleapis.com/v1/metrics`) when `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true`, `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`, and `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=EVENT_ONLY`.\n\n* **Metrics Management**: [Open Metrics Management](https://console.cloud.google.com/monitoring/metrics-management?project=adk-enterprise-observability) | **Trace Waterfall**: [Open Cloud Trace Explorer](https://console.cloud.google.com/traces/explorer?project=adk-enterprise-observability)",
             "format": "MARKDOWN"
           }
         }
@@ -22,7 +22,7 @@
         "xPos": 0,
         "yPos": 2,
         "widget": {
-          "title": "GenAI Mean Tokens per Call by Token Type (input vs output)",
+          "title": "1. GenAI Token Usage by Type (gen_ai.client.token.usage/histogram)",
           "xyChart": {
             "dataSets": [
               {
@@ -30,13 +30,14 @@
                 "targetAxis": "Y1",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.token.usage\"",
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.client.token.usage/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
                       "crossSeriesReducer": "REDUCE_MEAN",
                       "groupByFields": [
-                        "metric.label.\"gen_ai_token_type\""
+                        "metric.label.\"gen_ai.token.type\"",
+                        "metric.label.\"gen_ai.request.model\""
                       ]
                     }
                   }
@@ -56,23 +57,22 @@
         "xPos": 6,
         "yPos": 2,
         "widget": {
-          "title": "GenAI Token Usage by Model (p95 & Mean Tokens)",
+          "title": "2. GenAI LLM Operation Duration (gen_ai.client.operation.duration/histogram)",
           "xyChart": {
             "dataSets": [
               {
                 "plotType": "LINE",
                 "targetAxis": "Y1",
-                "legendTemplate": "Mean ${metric.labels.gen_ai_token_type} (${metric.labels.gen_ai_request_model})",
+                "legendTemplate": "p95 (${metric.labels.gen_ai.request.model})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.token.usage\"",
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.client.operation.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
                       "groupByFields": [
-                        "metric.label.\"gen_ai_request_model\"",
-                        "metric.label.\"gen_ai_token_type\""
+                        "metric.label.\"gen_ai.request.model\""
                       ]
                     }
                   }
@@ -81,17 +81,16 @@
               {
                 "plotType": "LINE",
                 "targetAxis": "Y1",
-                "legendTemplate": "p95 ${metric.labels.gen_ai_token_type} (${metric.labels.gen_ai_request_model})",
+                "legendTemplate": "Mean (${metric.labels.gen_ai.request.model})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.token.usage\"",
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.client.operation.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
+                      "crossSeriesReducer": "REDUCE_MEAN",
                       "groupByFields": [
-                        "metric.label.\"gen_ai_request_model\"",
-                        "metric.label.\"gen_ai_token_type\""
+                        "metric.label.\"gen_ai.request.model\""
                       ]
                     }
                   }
@@ -99,7 +98,7 @@
               }
             ],
             "yAxis": {
-              "label": "tokens",
+              "label": "seconds",
               "scale": "LINEAR"
             }
           }
@@ -111,58 +110,21 @@
         "xPos": 0,
         "yPos": 6,
         "widget": {
-          "title": "GenAI LLM Operation Duration (p95, p50 & Mean Latency)",
+          "title": "3. ADK Tool Execution Duration by Tool (gen_ai.execute_tool.duration/histogram)",
           "xyChart": {
             "dataSets": [
               {
-                "plotType": "LINE",
+                "plotType": "STACKED_BAR",
                 "targetAxis": "Y1",
-                "legendTemplate": "p95 (${metric.labels.gen_ai_request_model})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.operation.duration\"",
-                    "aggregation": {
-                      "alignmentPeriod": "60s",
-                      "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
-                      "groupByFields": [
-                        "metric.label.\"gen_ai_request_model\""
-                      ]
-                    }
-                  }
-                }
-              },
-              {
-                "plotType": "LINE",
-                "targetAxis": "Y1",
-                "legendTemplate": "p50 (${metric.labels.gen_ai_request_model})",
-                "timeSeriesQuery": {
-                  "timeSeriesFilter": {
-                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.operation.duration\"",
-                    "aggregation": {
-                      "alignmentPeriod": "60s",
-                      "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_PERCENTILE_50",
-                      "groupByFields": [
-                        "metric.label.\"gen_ai_request_model\""
-                      ]
-                    }
-                  }
-                }
-              },
-              {
-                "plotType": "LINE",
-                "targetAxis": "Y1",
-                "legendTemplate": "Mean (${metric.labels.gen_ai_request_model})",
-                "timeSeriesQuery": {
-                  "timeSeriesFilter": {
-                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.operation.duration\"",
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.execute_tool.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
                       "crossSeriesReducer": "REDUCE_MEAN",
                       "groupByFields": [
-                        "metric.label.\"gen_ai_request_model\""
+                        "metric.label.\"gen_ai.tool.name\""
                       ]
                     }
                   }
@@ -182,22 +144,40 @@
         "xPos": 6,
         "yPos": 6,
         "widget": {
-          "title": "GenAI Active Series & Call Activity by Operation & Model",
+          "title": "4. ADK Agent Invocation Duration (gen_ai.invoke_agent.duration/histogram)",
           "xyChart": {
             "dataSets": [
               {
-                "plotType": "STACKED_BAR",
+                "plotType": "LINE",
                 "targetAxis": "Y1",
+                "legendTemplate": "p95 (${metric.labels.gen_ai.agent.name})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.operation.duration\"",
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_agent.duration/histogram\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_COUNT",
+                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
                       "groupByFields": [
-                        "metric.label.\"gen_ai_operation_name\"",
-                        "metric.label.\"gen_ai_request_model\""
+                        "metric.label.\"gen_ai.agent.name\""
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "Mean (${metric.labels.gen_ai.agent.name})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_agent.duration/histogram\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai.agent.name\""
                       ]
                     }
                   }
@@ -205,7 +185,113 @@
               }
             ],
             "yAxis": {
-              "label": "active series",
+              "label": "seconds",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "width": 6,
+        "height": 4,
+        "xPos": 0,
+        "yPos": 10,
+        "widget": {
+          "title": "5 & 6. ADK Inference Calls & Tool Calls per Turn (gen_ai.invoke_agent.*_calls/histogram)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "Inference Calls (${metric.labels.gen_ai.agent.name})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_agent.inference_calls/histogram\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai.agent.name\""
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "Tool Calls (${metric.labels.gen_ai.agent.name})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_agent.tool_calls/histogram\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai.agent.name\""
+                      ]
+                    }
+                  }
+                }
+              }
+            ],
+            "yAxis": {
+              "label": "calls / invocation",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "width": 6,
+        "height": 4,
+        "xPos": 6,
+        "yPos": 10,
+        "widget": {
+          "title": "7. ADK Workflow Invocation Duration (gen_ai.invoke_workflow.duration/histogram)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "p95 (${metric.labels.gen_ai.workflow.name})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_workflow.duration/histogram\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai.workflow.name\""
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "Mean (${metric.labels.gen_ai.workflow.name})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/gen_ai.invoke_workflow.duration/histogram\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai.workflow.name\""
+                      ]
+                    }
+                  }
+                }
+              }
+            ],
+            "yAxis": {
+              "label": "seconds",
               "scale": "LINEAR"
             }
           }

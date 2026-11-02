@@ -81,9 +81,24 @@ Both options replace static `.env` Gemini API keys with **Workload Identity / De
 Choose your deployment pattern below for full step-by-step instructions, configuration files, and verification commands:
 
 1. **[Option 1: Deploy to Vertex AI Agent Engine (Reasoning Engine)](./deploy/agent_engine/README.md)**
-   - Uses `vertexai.agent_engines.AdkApp`
-   - Zero Dockerfiles required
-   - Native OpenTelemetry integration with Google Cloud Trace & Cloud Monitoring (`AGENT_ENGINE_TELEMETRY=true`)
+   - Uses `vertexai.agent_engines.AdkApp` with `google-adk[otel]>=2.13.0`
+   - Zero Dockerfiles or custom metric code required
+   - Native OpenTelemetry integration via `google.adk.telemetry.google_cloud.get_gcp_exporters` (`https://telemetry.googleapis.com/v1/metrics`), automatically emitting all **7 `prometheus.googleapis.com/gen_ai.*/histogram` metrics** to Google Cloud Managed Service for Prometheus (GMP):
+     - `prometheus.googleapis.com/gen_ai.client.operation.duration/histogram`
+     - `prometheus.googleapis.com/gen_ai.client.token.usage/histogram`
+     - `prometheus.googleapis.com/gen_ai.execute_tool.duration/histogram`
+     - `prometheus.googleapis.com/gen_ai.invoke_agent.duration/histogram`
+     - `prometheus.googleapis.com/gen_ai.invoke_agent.inference_calls/histogram`
+     - `prometheus.googleapis.com/gen_ai.invoke_agent.tool_calls/histogram`
+     - `prometheus.googleapis.com/gen_ai.invoke_workflow.duration/histogram`
+   - Activated via standard environment variables:
+     ```bash
+     # Same telemetry settings the ADK team uses on Agent Engine
+     GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true
+     ADK_TELEMETRY_SCHEMA_VERSION_OPT_IN=1
+     OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental
+     OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=EVENT_ONLY
+     ```
 2. **[Option 2: Deploy to Google Cloud Run with OpenTelemetry Collector Sidecar](./deploy/cloud_run/README.md)**
    - Uses Cloud Run multi-container sidecar architecture
    - Runs `otelcol-google` sidecar with PII prompt redaction (`redaction` processor) and `sum` connector

@@ -33,13 +33,17 @@ DEFAULT_SERVICE_ACCOUNT = os.environ.get(
 # Set Vertex AI and OpenTelemetry env vars (same as .env) before importing OpsAgent
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
 os.environ["GOOGLE_CLOUD_PROJECT"] = DEFAULT_PROJECT_ID
+os.environ["GOOGLE_CLOUD_LOCATION"] = DEFAULT_LOCATION
 os.environ["ADK_VERTEX_LOCATION"] = "global"
 os.environ["ADK_MODEL"] = DEFAULT_MODEL
+os.environ["GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY"] = "true"
 os.environ["AGENT_ENGINE_TELEMETRY"] = "true"
 os.environ["OTEL_SERVICE_NAME"] = "adk-ops-agent"
-os.environ["OTEL_RESOURCE_ATTRIBUTES"] = f"gcp.project_id={DEFAULT_PROJECT_ID}"
-os.environ["OTEL_SEMCONV_STABILITY_OPT_IN"] = "gen_ai"
-os.environ["OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT"] = "events"
+os.environ["OTEL_RESOURCE_ATTRIBUTES"] = (
+    f"cloud.region={DEFAULT_LOCATION},gcp.project_id={DEFAULT_PROJECT_ID}"
+)
+os.environ["OTEL_SEMCONV_STABILITY_OPT_IN"] = "gen_ai_latest_experimental"
+os.environ["OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT"] = "EVENT_ONLY"
 os.environ["OTEL_METRIC_EXPORT_INTERVAL"] = "5000"
 
 import vertexai
@@ -148,14 +152,12 @@ def main() -> None:
   common_kwargs = dict(
       agent_engine=adk_app,
       requirements=[
-          f"google-adk=={adk_ver}",
+          f"google-adk[otel]=={adk_ver}",
           f"google-genai=={genai_ver}",
           f"google-cloud-aiplatform[adk,agent_engines]=={aiplatform_ver}",
-          "opentelemetry-sdk>=1.28.0",
-          "opentelemetry-exporter-gcp-trace>=1.7.0",
-          "opentelemetry-exporter-gcp-monitoring>=1.7.0",
-          "opentelemetry-exporter-gcp-logging>=1.7.0",
-          "opentelemetry-instrumentation-google-genai",
+          "opentelemetry-sdk>=1.39.0",
+          "opentelemetry-exporter-otlp-proto-http>=1.39.0",
+          "opentelemetry-instrumentation-google-genai>=0.7b0",
           "truststore>=0.10.0",
       ],
       extra_packages=[
@@ -164,17 +166,20 @@ def main() -> None:
       env_vars={
           "ADK_VERTEX_LOCATION": "global",
           "ADK_MODEL": DEFAULT_MODEL,
+          "GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY": "true",
           "AGENT_ENGINE_TELEMETRY": "true",
           "OTEL_SERVICE_NAME": "adk-ops-agent",
-          "OTEL_RESOURCE_ATTRIBUTES": f"gcp.project_id={args.project}",
-          "OTEL_SEMCONV_STABILITY_OPT_IN": "gen_ai",
-          "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT": "events",
+          "OTEL_RESOURCE_ATTRIBUTES": (
+              f"cloud.region={args.location},gcp.project_id={args.project}"
+          ),
+          "OTEL_SEMCONV_STABILITY_OPT_IN": "gen_ai_latest_experimental",
+          "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT": "EVENT_ONLY",
           "OTEL_METRIC_EXPORT_INTERVAL": "5000",
       },
       service_account=args.service_account,
       display_name="ops-agent-sre-copilot",
       description=(
-          "OpsAgent: Google ADK SRE & Observability Copilot with OpenTelemetry Cloud Trace"
+          "OpsAgent: Google ADK SRE & Observability Copilot with OpenTelemetry Cloud Trace & Prometheus Metrics"
       ),
   )
 

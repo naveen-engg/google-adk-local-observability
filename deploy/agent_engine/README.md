@@ -91,48 +91,64 @@ done
 
 ## 3. Step-by-Step Implementation
 
-### Step 3.1: Install Vertex AI Agent Engine & GCP OpenTelemetry Dependencies
-In your virtual environment, install the Vertex AI Agent Engine extras and Google Cloud OpenTelemetry exporters:
+### Step 3.1: Install Vertex AI Agent Engine & ADK OpenTelemetry Dependencies
+In your virtual environment, install `google-adk[otel]>=2.13.0` along with the Vertex AI Agent Engine SDK and OTLP HTTP exporter:
 
 ```bash
 pip install \
-  "google-cloud-aiplatform[adk,agent_engines]>=1.88.0" \
-  "opentelemetry-exporter-gcp-trace>=1.7.0" \
-  "opentelemetry-exporter-gcp-monitoring>=1.7.0" \
-  "opentelemetry-resourcedetector-gcp>=1.7.0"
+  "google-adk[otel]>=2.13.0" \
+  "google-cloud-aiplatform[adk,agent_engines]>=2.7.0" \
+  "opentelemetry-exporter-otlp-proto-http>=1.39.0" \
+  "opentelemetry-instrumentation-google-genai>=0.7b0"
 ```
 
-### Step 3.2: Configure Native GCP Exporters in `observability/otel_setup.py`
-When running inside Vertex AI Agent Engine (where there is no local `127.0.0.1:4318` OTel Collector sidecar), add a `gcp` exporter mode to `observability/otel_setup.py`:
+### Step 3.2: Enable ADK Built-In Agent Engine Telemetry (`prometheus.googleapis.com/gen_ai.*/histogram`)
+With `google-adk[otel]>=2.13.0`, ADK's built-in `google.adk.telemetry` (`get_gcp_exporters` + `get_gcp_resource`) pushes OpenTelemetry histograms over OTLP HTTP to Google Cloud Telemetry API (`https://telemetry.googleapis.com/v1/metrics`), which automatically populates **all 7 `prometheus.googleapis.com/gen_ai.*/histogram` metrics** in Google Cloud Managed Service for Prometheus (GMP) with zero custom metric code in `agent.py`:
+
+1. `prometheus.googleapis.com/gen_ai.client.operation.duration/histogram`
+2. `prometheus.googleapis.com/gen_ai.client.token.usage/histogram`
+3. `prometheus.googleapis.com/gen_ai.execute_tool.duration/histogram`
+4. `prometheus.googleapis.com/gen_ai.invoke_agent.duration/histogram`
+5. `prometheus.googleapis.com/gen_ai.invoke_agent.inference_calls/histogram`
+6. `prometheus.googleapis.com/gen_ai.invoke_agent.tool_calls/histogram`
+7. `prometheus.googleapis.com/gen_ai.invoke_workflow.duration/histogram`
+
+Configure the standard Agent Engine telemetry environment variables:
+```bash
+# Same telemetry settings the ADK team uses on Agent Engine
+GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true
+ADK_TELEMETRY_SCHEMA_VERSION_OPT_IN=1
+OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental
+OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=EVENT_ONLY
+```
+> **Note on `gen_ai.invoke_workflow.duration`:** When running an `LlmAgent` directly (without an outer `Workflow` wrapper), leaving `ADK_TELEMETRY_SCHEMA_VERSION_OPT_IN` at its default (`2`) emits all 7 metrics including `gen_ai.invoke_workflow.duration/histogram` on every invocation.
+
+In [`agents/ops_agent/__init__.py`](../../agents/ops_agent/__init__.py), ADK's built-in telemetry providers are initialized automatically when `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true`:
 
 ```python
 import os
-from opentelemetry import trace, metrics
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+import google.auth
+from google.adk.telemetry.setup import maybe_set_otel_providers
+from google.adk.telemetry.google_cloud import (
+    _CLOUD_PLATFORM_SCOPE,
+    get_gcp_exporters,
+    get_gcp_resource,
+)
 
-def setup_gcp_native_telemetry() -> None:
-    """Export traces and metrics directly to Google Cloud Trace & Cloud Monitoring."""
-    from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-    from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
-    from opentelemetry.resourcedetector.gcp_resource_detector import GoogleCloudResourceDetector
+credentials, project_id = google.auth.default(scopes=[_CLOUD_PLATFORM_SCOPE])
+os.environ.setdefault("OTEL_RESOURCE_ATTRIBUTES", "cloud.region=us-central1")
 
-    resource = GoogleCloudResourceDetector().detect()
-
-    # 1. Cloud Trace Exporter
-    tracer_provider = TracerProvider(resource=resource)
-    tracer_provider.add_span_processor(BatchSpanProcessor(CloudTraceSpanExporter()))
-    trace.set_tracer_provider(tracer_provider)
-
-    # 2. Cloud Monitoring Metrics Exporter
-    metric_reader = PeriodicExportingMetricReader(
-        CloudMonitoringMetricsExporter(),
-        export_interval_millis=15000,
-    )
-    meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
-    metrics.set_meter_provider(meter_provider)
+maybe_set_otel_providers(
+    otel_hooks_to_setup=[
+        get_gcp_exporters(
+            enable_cloud_tracing=True,
+            enable_cloud_metrics=True,
+            enable_cloud_logging=True,
+            google_auth=(credentials, project_id),
+        )
+    ],
+    otel_resource=get_gcp_resource(project_id),
+)
 ```
 
 ### Step 3.3: Create the Deployment Script (`deploy/agent_engine/deploy.py`)
