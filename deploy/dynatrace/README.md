@@ -112,3 +112,19 @@ py -3.13 deploy/agent_engine/query_remote.py \
 ```bash
 py -3.13 deploy/dynatrace/simulate_dynatrace_telemetry.py
 ```
+
+---
+
+## 6. Live Dynatrace Observability Showcase (`voy39934`)
+
+### 6.1 Dashboard 1 — Google ADK GenAI Metrics & Token Analytics (All 7 `gen_ai.*` Metrics)
+Provisioned via [`deploy/dynatrace/dashboards/adk-genai-metrics-dynatrace-dashboard.json`](./dashboards/adk-genai-metrics-dynatrace-dashboard.json):
+![Dynatrace GenAI Metrics & Token Analytics Dashboard](../../docs/media/dynatrace_genai_metrics_dashboard.png)
+
+### 6.2 Dashboard 2 — Google ADK Distributed Traces, Spans & Correlated Logs
+Provisioned via [`deploy/dynatrace/dashboards/adk-traces-logs-dynatrace-dashboard.json`](./dashboards/adk-traces-logs-dynatrace-dashboard.json):
+![Dynatrace Distributed Traces, Spans & Correlated Logs Dashboard](../../docs/media/dynatrace_traces_logs_dashboard.png)
+
+### 6.3 End-to-End Distributed Trace Waterfall (`invoke_workflow` → `invoke_agent` → `generate_content` → `execute_tool`)
+Captured in Dynatrace Distributed Tracing (`service.name = adk-ops-agent`):
+![Dynatrace Distributed Trace Waterfall](../../docs/media/dynatrace_distributed_trace_waterfall.png)

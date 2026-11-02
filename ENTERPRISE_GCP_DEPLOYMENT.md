@@ -123,3 +123,18 @@ Provisioned via [`deploy/gcp_dashboards/adk-genai-gcp-dashboard.json`](./deploy/
 ### 2. GCP Cloud Trace Waterfall & Correlated Logs Dashboard
 Provisioned via [`deploy/gcp_dashboards/adk-traces-gcp-dashboard.json`](./deploy/gcp_dashboards/adk-traces-gcp-dashboard.json):
 ![GCP Cloud Trace & Monitoring Dashboard](./docs/media/gcp_monitoring_traces_dashboard.png)
+
+---
+
+## Live Dynatrace Enterprise Observability Showcase (`voy39934`)
+
+### 1. Dynatrace — Google ADK GenAI Metrics & Token Analytics (All 7 `gen_ai.*` Metrics)
+Provisioned via [`deploy/dynatrace/dashboards/adk-genai-metrics-dynatrace-dashboard.json`](./deploy/dynatrace/dashboards/adk-genai-metrics-dynatrace-dashboard.json):
+![Dynatrace GenAI Metrics & Token Analytics Dashboard](./docs/media/dynatrace_genai_metrics_dashboard.png)
+
+### 2. Dynatrace — Google ADK Distributed Traces, Spans & Correlated Logs
+Provisioned via [`deploy/dynatrace/dashboards/adk-traces-logs-dynatrace-dashboard.json`](./deploy/dynatrace/dashboards/adk-traces-logs-dynatrace-dashboard.json):
+![Dynatrace Distributed Traces, Spans & Correlated Logs Dashboard](./docs/media/dynatrace_traces_logs_dashboard.png)
+
+### 3. Dynatrace — Distributed Trace Waterfall (`invoke_workflow` → `invoke_agent` → `generate_content` → `execute_tool`)
+![Dynatrace Distributed Trace Waterfall](./docs/media/dynatrace_distributed_trace_waterfall.png)
