@@ -1,0 +1,435 @@
+{
+  "metadata": {
+    "configurationVersions": [7],
+    "clusterVersion": "1.300.0"
+  },
+  "dashboardMetadata": {
+    "name": "Google ADK — GenAI Metrics & Token Analytics (OpenTelemetry)",
+    "shared": true,
+    "preset": false,
+    "tags": [
+      "google-adk",
+      "genai",
+      "opentelemetry",
+      "llm-observability"
+    ],
+    "DynamicFilters": {
+      "filters": [
+        "CUSTOM_DIMENSION:gen_ai.request.model",
+        "CUSTOM_DIMENSION:gen_ai.agent.name",
+        "CUSTOM_DIMENSION:gen_ai.tool.name"
+      ]
+    }
+  },
+  "tiles": [
+    {
+      "name": "Markdown",
+      "tileType": "MARKDOWN",
+      "configured": true,
+      "bounds": {
+        "top": 0,
+        "left": 0,
+        "width": 1710,
+        "height": 114
+      },
+      " tileFilter": {},
+      "markdown": "## Google ADK Enterprise Observability — OpenTelemetry GenAI Metrics (Dynatrace)\nVisualizes all **7 native ADK OpenTelemetry GenAI Histogram Metrics** (`gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, `gen_ai.execute_tool.duration`, `gen_ai.invoke_agent.duration`, `gen_ai.invoke_agent.inference_calls`, `gen_ai.invoke_agent.tool_calls`, `gen_ai.invoke_workflow.duration`) ingested directly via Dynatrace OTLP HTTP API (`/api/v2/otlp/v1/metrics`) with credentials fetched at runtime from **Google Cloud Secret Manager**."
+    },
+    {
+      "name": "1. GenAI Token Usage by Token Type & Model (gen_ai.client.token.usage)",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 114,
+        "left": 0,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "customName": "1. GenAI Token Usage by Token Type & Model (gen_ai.client.token.usage)",
+      "queries": [
+        {
+          "id": "A",
+          "metric": "gen_ai.client.token.usage",
+          "spaceAggregation": "SUM",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.token.type",
+            "gen_ai.request.model"
+          ],
+          "enabled": true
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "label": "Tokens",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": ["A"],
+              "defaultAxis": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. GenAI LLM Operation Duration — Avg & Max (gen_ai.client.operation.duration)",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 114,
+        "left": 855,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "customName": "2. GenAI LLM Operation Duration (gen_ai.client.operation.duration)",
+      "queries": [
+        {
+          "id": "A",
+          "metric": "gen_ai.client.operation.duration",
+          "spaceAggregation": "AVG",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.request.model",
+            "gen_ai.operation.name"
+          ],
+          "enabled": true
+        },
+        {
+          "id": "B",
+          "metric": "gen_ai.client.operation.duration",
+          "spaceAggregation": "MAX",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.request.model"
+          ],
+          "enabled": true
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          },
+          {
+            "matcher": "B:",
+            "properties": {
+              "seriesType": "LINE"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "label": "Seconds",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": ["A", "B"],
+              "defaultAxis": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. ADK Tool Execution Duration by Tool (gen_ai.execute_tool.duration)",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 418,
+        "left": 0,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "customName": "3. ADK Tool Execution Duration by Tool (gen_ai.execute_tool.duration)",
+      "queries": [
+        {
+          "id": "A",
+          "metric": "gen_ai.execute_tool.duration",
+          "spaceAggregation": "AVG",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.tool.name",
+            "gen_ai.agent.name"
+          ],
+          "enabled": true
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "label": "Seconds",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": ["A"],
+              "defaultAxis": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. ADK Agent Invocation Duration (gen_ai.invoke_agent.duration)",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 418,
+        "left": 855,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "customName": "4. ADK Agent Invocation Duration (gen_ai.invoke_agent.duration)",
+      "queries": [
+        {
+          "id": "A",
+          "metric": "gen_ai.invoke_agent.duration",
+          "spaceAggregation": "AVG",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.agent.name"
+          ],
+          "enabled": true
+        },
+        {
+          "id": "B",
+          "metric": "gen_ai.invoke_agent.duration",
+          "spaceAggregation": "MAX",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.agent.name"
+          ],
+          "enabled": true
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          },
+          {
+            "matcher": "B:",
+            "properties": {
+              "seriesType": "LINE"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "label": "Seconds",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": ["A", "B"],
+              "defaultAxis": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "5 & 6. ADK Inference Calls & Tool Calls per Turn (gen_ai.invoke_agent.*_calls)",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 722,
+        "left": 0,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "customName": "5 & 6. ADK Inference Calls & Tool Calls per Turn (gen_ai.invoke_agent.*_calls)",
+      "queries": [
+        {
+          "id": "A",
+          "metric": "gen_ai.invoke_agent.inference_calls",
+          "spaceAggregation": "SUM",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.agent.name"
+          ],
+          "enabled": true
+        },
+        {
+          "id": "B",
+          "metric": "gen_ai.invoke_agent.tool_calls",
+          "spaceAggregation": "SUM",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.agent.name"
+          ],
+          "enabled": true
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          },
+          {
+            "matcher": "B:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "label": "Calls",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": ["A", "B"],
+              "defaultAxis": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. ADK Workflow Invocation Duration (gen_ai.invoke_workflow.duration)",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 722,
+        "left": 855,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "customName": "7. ADK Workflow Invocation Duration (gen_ai.invoke_workflow.duration)",
+      "queries": [
+        {
+          "id": "A",
+          "metric": "gen_ai.invoke_workflow.duration",
+          "spaceAggregation": "AVG",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.workflow.name",
+            "gen_ai.operation.name"
+          ],
+          "enabled": true
+        },
+        {
+          "id": "B",
+          "metric": "gen_ai.invoke_workflow.duration",
+          "spaceAggregation": "MAX",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.workflow.name"
+          ],
+          "enabled": true
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          },
+          {
+            "matcher": "B:",
+            "properties": {
+              "seriesType": "LINE"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "label": "Seconds",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": ["A", "B"],
+              "defaultAxis": true
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "version": 19,
+  "variables": [],
+  "tiles": {
+    "0": {
+      "type": "markdown",
+      "title": "",
+      "content": "## Google ADK Enterprise Observability — OpenTelemetry GenAI Metrics (Dynatrace Grail)\nVisualizes all **7 native ADK OpenTelemetry GenAI Histogram Metrics** (`gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, `gen_ai.execute_tool.duration`, `gen_ai.invoke_agent.duration`, `gen_ai.invoke_agent.inference_calls`, `gen_ai.invoke_agent.tool_calls`, `gen_ai.invoke_workflow.duration`) exported via `/api/v2/otlp/v1/metrics` using credentials fetched at runtime from **Google Cloud Secret Manager**."
+    },
+    "1": {
+      "type": "data",
+      "title": "1. GenAI Token Usage by Token Type & Model (gen_ai.client.token.usage)",
+      "query": "timeseries tokens = sum(gen_ai.client.token.usage), by: { `gen_ai.token.type`, `gen_ai.request.model` }",
+      "visualization": "categoricalBarChart"
+    },
+    "2": {
+      "type": "data",
+      "title": "2. GenAI LLM Operation Duration (gen_ai.client.operation.duration)",
+      "query": "timeseries { avg_latency = avg(gen_ai.client.operation.duration), max_latency = max(gen_ai.client.operation.duration) }, by: { `gen_ai.request.model` }",
+      "visualization": "lineChart"
+    },
+    "3": {
+      "type": "data",
+      "title": "3. ADK Tool Execution Duration by Tool (gen_ai.execute_tool.duration)",
+      "query": "timeseries tool_duration = avg(gen_ai.execute_tool.duration), by: { `gen_ai.tool.name` }",
+      "visualization": "categoricalBarChart"
+    },
+    "4": {
+      "type": "data",
+      "title": "4. ADK Agent Invocation Duration (gen_ai.invoke_agent.duration)",
+      "query": "timeseries { avg_agent_dur = avg(gen_ai.invoke_agent.duration), max_agent_dur = max(gen_ai.invoke_agent.duration) }, by: { `gen_ai.agent.name` }",
+      "visualization": "lineChart"
+    },
+    "5": {
+      "type": "data",
+      "title": "5 & 6. ADK Inference Calls & Tool Calls per Turn (gen_ai.invoke_agent.*_calls)",
+      "query": "timeseries { inference_calls = sum(gen_ai.invoke_agent.inference_calls), tool_calls = sum(gen_ai.invoke_agent.tool_calls) }, by: { `gen_ai.agent.name` }",
+      "visualization": "categoricalBarChart"
+    },
+    "6": {
+      "type": "data",
+      "title": "7. ADK Workflow Invocation Duration (gen_ai.invoke_workflow.duration)",
+      "query": "timeseries { avg_workflow_dur = avg(gen_ai.invoke_workflow.duration), max_workflow_dur = max(gen_ai.invoke_workflow.duration) }, by: { `gen_ai.workflow.name` }",
+      "visualization": "lineChart"
+    }
+  },
+  "layouts": {
+    "0": { "x": 0, "y": 0, "w": 24, "h": 3 },
+    "1": { "x": 0, "y": 3, "w": 12, "h": 6 },
+    "2": { "x": 12, "y": 3, "w": 12, "h": 6 },
+    "3": { "x": 0, "y": 9, "w": 12, "h": 6 },
+    "4": { "x": 12, "y": 9, "w": 12, "h": 6 },
+    "5": { "x": 0, "y": 15, "w": 12, "h": 6 },
+    "6": { "x": 12, "y": 15, "w": 12, "h": 6 }
+  }
+}

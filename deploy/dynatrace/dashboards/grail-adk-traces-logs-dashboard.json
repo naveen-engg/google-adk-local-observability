@@ -1,0 +1,42 @@
+{
+  "version": 19,
+  "variables": [],
+  "tiles": {
+    "0": {
+      "type": "markdown",
+      "title": "",
+      "content": "## Google ADK Enterprise Observability — Distributed Traces, Spans & Correlated Logs (Dynatrace Grail)\nMonitors **OpenTelemetry Distributed Trace Waterfalls** (`invoke_agent` -> `call_llm` -> `execute_tool`), **Span Latency by Operation**, and **Correlated GenAI Events / Logs** ingested via `/api/v2/otlp/v1/traces` and `/api/v2/otlp/v1/logs`."
+    },
+    "1": {
+      "type": "data",
+      "title": "1. Distributed Trace Spans by Operation (invoke_agent, call_llm, execute_tool)",
+      "query": "fetch spans | filter service.name == \"adk-ops-agent\" or isNotNull(gen_ai.agent.name) or isNotNull(gen_ai.request.model) | summarize span_count = count(), avg_duration_ms = avg(duration) / 1000000, by: { span.name }",
+      "visualization": "categoricalBarChart"
+    },
+    "2": {
+      "type": "data",
+      "title": "2. Recent ADK Distributed Trace Spans Waterfall Table",
+      "query": "fetch spans | filter service.name == \"adk-ops-agent\" or isNotNull(gen_ai.agent.name) or isNotNull(gen_ai.request.model) | sort start_time desc | fields start_time, span.name, duration, `gen_ai.agent.name`, `gen_ai.tool.name`, `gen_ai.request.model`, trace.id, span.id | limit 50",
+      "visualization": "table"
+    },
+    "3": {
+      "type": "data",
+      "title": "3. Tool Execution Span Count & Duration Breakdown",
+      "query": "timeseries { count = count(gen_ai.execute_tool.duration), avg_sec = avg(gen_ai.execute_tool.duration) }, by: { `gen_ai.tool.name` }",
+      "visualization": "lineChart"
+    },
+    "4": {
+      "type": "data",
+      "title": "4. Correlated ADK Agent Logs & GenAI Inference Events",
+      "query": "fetch logs | filter service.name == \"adk-ops-agent\" or contains(content, \"gen_ai\") | sort timestamp desc | fields timestamp, status, content, trace_id, span_id | limit 50",
+      "visualization": "table"
+    }
+  },
+  "layouts": {
+    "0": { "x": 0, "y": 0, "w": 24, "h": 3 },
+    "1": { "x": 0, "y": 3, "w": 12, "h": 6 },
+    "3": { "x": 12, "y": 3, "w": 12, "h": 6 },
+    "2": { "x": 0, "y": 9, "w": 12, "h": 7 },
+    "4": { "x": 12, "y": 9, "w": 12, "h": 7 }
+  }
+}

@@ -1,0 +1,266 @@
+{
+  "metadata": {
+    "configurationVersions": [7],
+    "clusterVersion": "1.300.0"
+  },
+  "dashboardMetadata": {
+    "name": "Google ADK — Distributed Traces, Spans & Correlated Logs (OpenTelemetry)",
+    "shared": true,
+    "preset": false,
+    "tags": [
+      "google-adk",
+      "distributed-tracing",
+      "opentelemetry",
+      "logs"
+    ],
+    "DynamicFilters": {
+      "filters": [
+        "CUSTOM_DIMENSION:gen_ai.agent.name",
+        "CUSTOM_DIMENSION:gen_ai.tool.name",
+        "CUSTOM_DIMENSION:gen_ai.request.model"
+      ]
+    }
+  },
+  "tiles": [
+    {
+      "name": "Markdown",
+      "tileType": "MARKDOWN",
+      "configured": true,
+      "bounds": {
+        "top": 0,
+        "left": 0,
+        "width": 1710,
+        "height": 114
+      },
+      "tileFilter": {},
+      "markdown": "## Google ADK Enterprise Observability — Distributed Tracing, Spans & Correlated Logs (Dynatrace)\nMonitors **OpenTelemetry Distributed Trace Spans** (`invoke_agent`, `call_llm`, `execute_tool`), **Tool & Agent Span Latencies**, **LLM Inference Throughput**, and **Correlated GenAI Events / Logs** ingested via `/api/v2/otlp/v1/traces` and `/api/v2/otlp/v1/logs`."
+    },
+    {
+      "name": "1. ADK Agent & Workflow Span Throughput (invoke_agent vs invoke_workflow)",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 114,
+        "left": 0,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "customName": "1. ADK Agent & Workflow Span Volume (invoke_agent vs invoke_workflow)",
+      "queries": [
+        {
+          "id": "A",
+          "metric": "gen_ai.invoke_agent.duration",
+          "spaceAggregation": "COUNT",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.agent.name"
+          ],
+          "enabled": true
+        },
+        {
+          "id": "B",
+          "metric": "gen_ai.invoke_workflow.duration",
+          "spaceAggregation": "COUNT",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.workflow.name"
+          ],
+          "enabled": true
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          },
+          {
+            "matcher": "B:",
+            "properties": {
+              "seriesType": "LINE"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "label": "Span Count",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": ["A", "B"],
+              "defaultAxis": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Tool Span Execution Count & Latency Breakdown (execute_tool)",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 114,
+        "left": 855,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "customName": "2. Tool Span Execution Count & Latency by Tool (execute_tool)",
+      "queries": [
+        {
+          "id": "A",
+          "metric": "gen_ai.execute_tool.duration",
+          "spaceAggregation": "COUNT",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.tool.name"
+          ],
+          "enabled": true
+        },
+        {
+          "id": "B",
+          "metric": "gen_ai.execute_tool.duration",
+          "spaceAggregation": "MAX",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.tool.name"
+          ],
+          "enabled": true
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          },
+          {
+            "matcher": "B:",
+            "properties": {
+              "seriesType": "LINE"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "label": "Count / Max Duration (s)",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": ["A", "B"],
+              "defaultAxis": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. LLM Call Span Frequency & Latency (call_llm / generate_content)",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 418,
+        "left": 0,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "customName": "3. LLM Call Span Frequency & Latency (call_llm / generate_content)",
+      "queries": [
+        {
+          "id": "A",
+          "metric": "gen_ai.client.operation.duration",
+          "spaceAggregation": "COUNT",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.request.model",
+            "gen_ai.operation.name"
+          ],
+          "enabled": true
+        },
+        {
+          "id": "B",
+          "metric": "gen_ai.client.operation.duration",
+          "spaceAggregation": "AVG",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "gen_ai.request.model"
+          ],
+          "enabled": true
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "properties": {
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          },
+          {
+            "matcher": "B:",
+            "properties": {
+              "seriesType": "LINE"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "label": "LLM Calls / Avg Latency (s)",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": ["A", "B"],
+              "defaultAxis": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. End-to-End Trace Waterfall & Correlated Logs Navigation",
+      "tileType": "MARKDOWN",
+      "configured": true,
+      "bounds": {
+        "top": 418,
+        "left": 855,
+        "width": 855,
+        "height": 304
+      },
+      "tileFilter": {},
+      "markdown": "### Inspecting Full OpenTelemetry Trace Waterfalls & Logs in Dynatrace\n\n1. **Distributed Traces (`invoke_agent` -> `call_llm` -> `execute_tool`)**:\n   - Open **Distributed Tracing** in Dynatrace and filter by `service.name = adk-ops-agent`.\n   - Click any trace (`invoke_agent OpsAgent`) to inspect child `call_llm` and `execute_tool` spans along with `gen_ai.*` span attributes.\n2. **Correlated GenAI Prompt/Completion Events & Logs**:\n   - Open **Logs & Events** and filter by `service.name = adk-ops-agent` (or `event.name = gen_ai.client.inference.operation.details`).\n   - Every log record carries `trace_id` and `span_id` for 1-click jump between logs and trace waterfalls.\n3. **DQL Query for Grail Notebooks / Dashboards**:\n   ```dql\n   fetch spans\n   | filter service.name == \"adk-ops-agent\"\n   | sort start_time desc\n   | fields start_time, span.name, duration, gen_ai.agent.name, gen_ai.tool.name, gen_ai.request.model, trace.id\n   ```"
+    }
+  ]
+}
