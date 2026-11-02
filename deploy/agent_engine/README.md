@@ -222,8 +222,6 @@ gcloud monitoring dashboards create \
 ```
 
 ### 5.4 Live GCP Cloud Monitoring Snapshots
-- **Metrics Management (All 7 `prometheus.googleapis.com/gen_ai.*/histogram` Metrics)**:
-  ![GCP Metrics Management 7 GenAI Histograms](../../docs/media/gcp_metrics_management_7_histograms.png)
 - **ADK GenAI Metrics & Token Analytics Dashboard**:
   ![GCP Cloud Monitoring GenAI Dashboard](../../docs/media/gcp_monitoring_genai_dashboard.png)
 - **ADK Distributed Traces, Spans & Logs Dashboard**:
