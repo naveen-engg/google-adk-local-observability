@@ -45,45 +45,6 @@ try:
       encoded = payload.get("payload", {}).get("data", "")
       return base64.b64decode(encoded).decode("utf-8").strip() if encoded else None
 
-  # Optional runtime Dynatrace OTLP configuration via GCP Secret Manager
-  dynatrace_enabled = os.environ.get("DYNATRACE_ENABLED", "").lower() in (
-      "true",
-      "1",
-      "yes",
-  )
-  if dynatrace_enabled:
-    import google.auth
-
-    dt_creds, default_proj = google.auth.default(
-        scopes=["https://www.googleapis.com/auth/cloud-platform"]
-    )
-    dt_project = os.environ.get("GOOGLE_CLOUD_PROJECT") or default_proj
-    dt_url_secret = os.environ.get("DYNATRACE_URL_SECRET_NAME", "dynatrace-env-url")
-    dt_token_secret = os.environ.get(
-        "DYNATRACE_TOKEN_SECRET_NAME", "dynatrace-api-token"
-    )
-    dt_url = os.environ.get("DYNATRACE_ENV_URL") or _load_gcp_secret(
-        dt_project, dt_url_secret, dt_creds
-    )
-    dt_token = os.environ.get("DYNATRACE_API_TOKEN") or _load_gcp_secret(
-        dt_project, dt_token_secret, dt_creds
-    )
-    if dt_url and dt_token:
-      # Normalize Dynatrace SaaS/Trial URL (.apps.dynatrace.com -> .live.dynatrace.com/api/v2/otlp)
-      clean_url = dt_url.rstrip("/").replace(
-          ".apps.dynatrace.com", ".live.dynatrace.com"
-      )
-      if not clean_url.endswith("/api/v2/otlp"):
-        clean_url = f"{clean_url}/api/v2/otlp"
-      os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = clean_url
-      os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Api-Token {dt_token}"
-      os.environ.setdefault("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
-      os.environ.setdefault(
-          "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE", "delta"
-      )
-      os.environ.setdefault("OTEL_SERVICE_NAME", "adk-ops-agent")
-      logger.debug("Configured Dynatrace OTLP endpoint from GCP Secret Manager: %s", clean_url)
-
   otel_hooks = []
   otel_resource = None
   telemetry_enabled = os.environ.get(
@@ -122,6 +83,44 @@ try:
         )
     )
     otel_resource = get_gcp_resource(project_id)
+
+  # Optional runtime Dynatrace OTLP configuration via GCP Secret Manager
+  # Configured after get_gcp_exporters() so GCP keeps CUMULATIVE temporality
+  # while _get_otel_exporters() in maybe_set_otel_providers() uses DELTA for Dynatrace.
+  dynatrace_enabled = os.environ.get("DYNATRACE_ENABLED", "").lower() in (
+      "true",
+      "1",
+      "yes",
+  )
+  if dynatrace_enabled:
+    import google.auth
+
+    dt_creds, default_proj = google.auth.default(
+        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+    )
+    dt_project = os.environ.get("GOOGLE_CLOUD_PROJECT") or default_proj
+    dt_url_secret = os.environ.get("DYNATRACE_URL_SECRET_NAME", "dynatrace-env-url")
+    dt_token_secret = os.environ.get(
+        "DYNATRACE_TOKEN_SECRET_NAME", "dynatrace-api-token"
+    )
+    dt_url = os.environ.get("DYNATRACE_ENV_URL") or _load_gcp_secret(
+        dt_project, dt_url_secret, dt_creds
+    )
+    dt_token = os.environ.get("DYNATRACE_API_TOKEN") or _load_gcp_secret(
+        dt_project, dt_token_secret, dt_creds
+    )
+    if dt_url and dt_token:
+      clean_url = dt_url.rstrip("/").replace(
+          ".apps.dynatrace.com", ".live.dynatrace.com"
+      )
+      if not clean_url.endswith("/api/v2/otlp"):
+        clean_url = f"{clean_url}/api/v2/otlp"
+      os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = clean_url
+      os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Api-Token {dt_token}"
+      os.environ.setdefault("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+      os.environ["OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE"] = "delta"
+      os.environ.setdefault("OTEL_SERVICE_NAME", "adk-ops-agent")
+      logger.debug("Configured Dynatrace OTLP endpoint from GCP Secret Manager: %s", clean_url)
 
   maybe_set_otel_providers(
       otel_hooks_to_setup=otel_hooks,

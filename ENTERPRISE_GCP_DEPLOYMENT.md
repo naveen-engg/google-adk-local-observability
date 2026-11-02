@@ -2,12 +2,13 @@
 
 This guide covers deploying the **Google ADK `OpsAgent` (SRE Copilot)** and its **OpenTelemetry GenAI Observability Pipeline** to production **Google Cloud Platform (GCP)** environments.
 
-We provide two production-ready reference architectures depending on your operational requirements:
+We provide three production-ready reference architectures depending on your operational requirements:
 
 | Architecture | Dedicated Guide | Best For | Telemetry Pipeline |
 | :--- | :--- | :--- | :--- |
-| **Option 1: Vertex AI Agent Engine (Reasoning Engine)** | **[`deploy/agent_engine/README.md`](./deploy/agent_engine/README.md)** | Turnkey managed ADK runtime with built-in session state, memory bank, and zero container management | Native `AdkApp` tracing + Python GCP Exporters (`CloudTraceSpanExporter` & `CloudMonitoringMetricsExporter`) |
+| **Option 1: Vertex AI Agent Engine (Reasoning Engine)** | **[`deploy/agent_engine/README.md`](./deploy/agent_engine/README.md)** | Turnkey managed ADK runtime with built-in session state, memory bank, and zero container management | Native `AdkApp` tracing + ADK `get_gcp_exporters()` (`telemetry.googleapis.com` -> Cloud Trace & Managed Prometheus) |
 | **Option 2: Google Cloud Run + OTel Collector Sidecar** | **[`deploy/cloud_run/README.md`](./deploy/cloud_run/README.md)** | Serverless containers hosting the interactive ADK Web UI / FastAPI API + centralized PII prompt redaction | Multi-container Pod: ADK Agent (`:8000`) -> OTel Collector Sidecar (`:4318`) -> Cloud Trace & Managed Prometheus (GMP) |
+| **Option 3: Dynatrace + GCP Secret Manager** | **[`deploy/dynatrace/README.md`](./deploy/dynatrace/README.md)** | Enterprise Dynatrace SaaS/Grail observability with credentials resolved dynamically from GCP Secret Manager | Runtime Secret Manager fetch (`dynatrace-env-url` & `dynatrace-api-token`) -> Dynatrace OTLP (`/api/v2/otlp`) |
 
 ---
 
@@ -103,6 +104,13 @@ Choose your deployment pattern below for full step-by-step instructions, configu
    - Uses Cloud Run multi-container sidecar architecture
    - Runs `otelcol-google` sidecar with PII prompt redaction (`redaction` processor) and `sum` connector
    - Exports directly to Google Cloud Managed Service for Prometheus (GMP) and Cloud Trace
+3. **[Option 3: Enterprise Observability with Dynatrace & GCP Secret Manager](./deploy/dynatrace/README.md)**
+   - Stores Dynatrace Environment URL (`dynatrace-env-url`) and API Token (`dynatrace-api-token`) in Google Cloud Secret Manager
+   - Resolves credentials dynamically at runtime when `DYNATRACE_ENABLED=true` (both locally and on Vertex AI Agent Engine)
+   - Exports all **7 native `gen_ai.*` metrics** (`DELTA` temporality), distributed trace spans (`invoke_agent`, `call_llm`, `execute_tool`), and correlated logs to Dynatrace (`/api/v2/otlp`)
+   - Provisions two separate Dynatrace dashboards via [`deploy/dynatrace/provision_dashboards.py`](./deploy/dynatrace/provision_dashboards.py):
+     - [Google ADK — GenAI Metrics & Token Analytics (`5443daae-e753-49b5-94ed-32d48b707e23`)](https://voy39934.apps.dynatrace.com/ui/apps/dynatrace.classic.dashboards/#dashboard;id=5443daae-e753-49b5-94ed-32d48b707e23)
+     - [Google ADK — Distributed Traces, Spans & Correlated Logs (`575caaa3-b37f-4489-8b24-218aa0ac0118`)](https://voy39934.apps.dynatrace.com/ui/apps/dynatrace.classic.dashboards/#dashboard;id=575caaa3-b37f-4489-8b24-218aa0ac0118)
 
 ---
 

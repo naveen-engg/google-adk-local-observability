@@ -168,6 +168,9 @@ def main() -> None:
           "ADK_MODEL": DEFAULT_MODEL,
           "GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY": "true",
           "AGENT_ENGINE_TELEMETRY": "true",
+          "DYNATRACE_ENABLED": "true",
+          "DYNATRACE_URL_SECRET_NAME": "dynatrace-env-url",
+          "DYNATRACE_TOKEN_SECRET_NAME": "dynatrace-api-token",
           "OTEL_SERVICE_NAME": "adk-ops-agent",
           "OTEL_RESOURCE_ATTRIBUTES": (
               f"cloud.region={args.location},gcp.project_id={args.project}"
