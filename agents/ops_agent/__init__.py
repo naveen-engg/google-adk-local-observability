@@ -21,9 +21,22 @@ except Exception as e:
 
 # Explicitly initialize ADK OpenTelemetry providers (traces, metrics, and logs)
 try:
+  import os
   from google.adk.telemetry.setup import maybe_set_otel_providers
 
-  maybe_set_otel_providers()
+  otel_hooks = []
+  if os.environ.get("AGENT_ENGINE_TELEMETRY", "").lower() in ("true", "1", "yes"):
+    from google.adk.telemetry.google_cloud import get_gcp_exporters
+
+    otel_hooks.append(
+        get_gcp_exporters(
+            enable_cloud_tracing=True,
+            enable_cloud_metrics=True,
+            enable_cloud_logging=True,
+        )
+    )
+
+  maybe_set_otel_providers(otel_hooks_to_setup=otel_hooks)
   logger.debug("Successfully initialized ADK OpenTelemetry providers.")
 except Exception as e:
   logger.debug("Could not initialize ADK OpenTelemetry providers: %s", e)

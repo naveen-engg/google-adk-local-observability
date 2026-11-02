@@ -1,0 +1,178 @@
+{
+  "displayName": "ADK GenAI Metrics & Token Analytics (Enterprise GCP)",
+  "mosaicLayout": {
+    "columns": 12,
+    "tiles": [
+      {
+        "width": 12,
+        "height": 2,
+        "xPos": 0,
+        "yPos": 0,
+        "widget": {
+          "title": "Google ADK Enterprise Observability — OpenTelemetry GenAI Metrics",
+          "text": {
+            "content": "Visualizes standard **OpenTelemetry GenAI Semantic Convention Metrics** (`workload.googleapis.com/gen_ai.client.token.usage` and `workload.googleapis.com/gen_ai.client.operation.duration`) emitted automatically by `opentelemetry-instrumentation-google-genai` and `google.adk.telemetry.google_cloud.get_gcp_exporters` when `AGENT_ENGINE_TELEMETRY=true` and `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai`.\n\n* **Trace Waterfall**: [Open Cloud Trace Explorer](https://console.cloud.google.com/traces/explorer?project=adk-enterprise-observability) | **Metrics Explorer (PromQL)**: [Open Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?project=adk-enterprise-observability)",
+            "format": "MARKDOWN"
+          }
+        }
+      },
+      {
+        "width": 6,
+        "height": 4,
+        "xPos": 0,
+        "yPos": 2,
+        "widget": {
+          "title": "GenAI Token Usage by Token Type (input vs output)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "plotType": "STACKED_BAR",
+                "targetAxis": "Y1",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.token.usage\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_SUM",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai_token_type\""
+                      ]
+                    }
+                  }
+                }
+              }
+            ],
+            "yAxis": {
+              "label": "tokens / min",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "width": 6,
+        "height": 4,
+        "xPos": 6,
+        "yPos": 2,
+        "widget": {
+          "title": "GenAI Token Usage by Model (gen_ai_request_model)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.token.usage\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_SUM",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai_request_model\"",
+                        "metric.label.\"gen_ai_token_type\""
+                      ]
+                    }
+                  }
+                }
+              }
+            ],
+            "yAxis": {
+              "label": "tokens / min",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "width": 6,
+        "height": 4,
+        "xPos": 0,
+        "yPos": 6,
+        "widget": {
+          "title": "GenAI LLM Operation Duration (p95 & p50 Latency)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "p95 (${metric.labels.gen_ai_request_model})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.operation.duration\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai_request_model\""
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "p50 (${metric.labels.gen_ai_request_model})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.operation.duration\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_PERCENTILE_50",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai_request_model\""
+                      ]
+                    }
+                  }
+                }
+              }
+            ],
+            "yAxis": {
+              "label": "seconds",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "width": 6,
+        "height": 4,
+        "xPos": 6,
+        "yPos": 6,
+        "widget": {
+          "title": "GenAI LLM Call Count by Operation & Model",
+          "xyChart": {
+            "dataSets": [
+              {
+                "plotType": "STACKED_BAR",
+                "targetAxis": "Y1",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.operation.duration\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_COUNT",
+                      "crossSeriesReducer": "REDUCE_SUM",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai_operation_name\"",
+                        "metric.label.\"gen_ai_request_model\""
+                      ]
+                    }
+                  }
+                }
+              }
+            ],
+            "yAxis": {
+              "label": "LLM calls / min",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -30,11 +30,17 @@ DEFAULT_SERVICE_ACCOUNT = os.environ.get(
     f"adk-agent-engine-sa@{DEFAULT_PROJECT_ID}.iam.gserviceaccount.com",
 )
 
-# Set Vertex AI global model routing before importing OpsAgent
+# Set Vertex AI and OpenTelemetry env vars (same as .env) before importing OpsAgent
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
 os.environ["GOOGLE_CLOUD_PROJECT"] = DEFAULT_PROJECT_ID
 os.environ["ADK_VERTEX_LOCATION"] = "global"
 os.environ["ADK_MODEL"] = DEFAULT_MODEL
+os.environ["AGENT_ENGINE_TELEMETRY"] = "true"
+os.environ["OTEL_SERVICE_NAME"] = "adk-ops-agent"
+os.environ["OTEL_RESOURCE_ATTRIBUTES"] = f"gcp.project_id={DEFAULT_PROJECT_ID}"
+os.environ["OTEL_SEMCONV_STABILITY_OPT_IN"] = "gen_ai"
+os.environ["OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT"] = "events"
+os.environ["OTEL_METRIC_EXPORT_INTERVAL"] = "5000"
 
 import vertexai
 from vertexai import agent_engines
@@ -111,13 +117,22 @@ def main() -> None:
     for event in adk_app.stream_query(
         user_id="sre-smoke-test",
         session_id=session.id,
-        message="Hi, I am Naveen! Explain the tokens telemetry metric.",
+        message=(
+            "Hi, I am Naveen! Simulate a latency incident, check pipeline health, "
+            "and explain the tokens telemetry metric."
+        ),
     ):
       content = event.get("content") if isinstance(event, dict) else None
       if content and "parts" in content:
         for part in content["parts"]:
           if "text" in part:
             response_text += part["text"]
+    # Flush OpenTelemetry trace provider
+    from opentelemetry import trace
+
+    tp = trace.get_tracer_provider()
+    if hasattr(tp, "force_flush"):
+      tp.force_flush()
     print(f"Smoke Test Response:\n  {response_text.strip()}\n")
 
   if args.smoke_test_only:
@@ -138,6 +153,8 @@ def main() -> None:
           f"google-cloud-aiplatform[adk,agent_engines]=={aiplatform_ver}",
           "opentelemetry-sdk>=1.28.0",
           "opentelemetry-exporter-gcp-trace>=1.7.0",
+          "opentelemetry-exporter-gcp-monitoring>=1.7.0",
+          "opentelemetry-exporter-gcp-logging>=1.7.0",
           "opentelemetry-instrumentation-google-genai",
           "truststore>=0.10.0",
       ],
@@ -147,8 +164,12 @@ def main() -> None:
       env_vars={
           "ADK_VERTEX_LOCATION": "global",
           "ADK_MODEL": DEFAULT_MODEL,
+          "AGENT_ENGINE_TELEMETRY": "true",
           "OTEL_SERVICE_NAME": "adk-ops-agent",
-          "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT": "true",
+          "OTEL_RESOURCE_ATTRIBUTES": f"gcp.project_id={args.project}",
+          "OTEL_SEMCONV_STABILITY_OPT_IN": "gen_ai",
+          "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT": "events",
+          "OTEL_METRIC_EXPORT_INTERVAL": "5000",
       },
       service_account=args.service_account,
       display_name="ops-agent-sre-copilot",
