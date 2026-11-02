@@ -11,7 +11,7 @@
         "widget": {
           "title": "Google ADK Enterprise Observability — Distributed Tracing & Correlated Logs",
           "text": {
-            "content": "Monitors **Google Cloud Trace** ingestion (`telemetry.googleapis.com` & `cloudtrace.googleapis.com`), **Vertex AI API** call volume/latency, and **Correlated Agent Logs** (`adk-otel` / `adk-ops-agent`).\n\n* **Inspect Full Span Waterfalls (`invoke_agent` → `call_llm` → `execute_tool`)**: [Open Cloud Trace Explorer](https://console.cloud.google.com/traces/explorer?project=adk-enterprise-observability)",
+            "content": "Monitors **Google Cloud Trace & Telemetry API** ingestion (`telemetry.googleapis.com`, `cloudtrace.googleapis.com`, `monitoring.googleapis.com`), **Vertex AI API** call volume/latency, and **Correlated Agent Logs** (`adk-otel` / `adk-on-agent-engine`).\n\n* **Inspect Full Span Waterfalls (`invoke_agent` → `call_llm` → `execute_tool`)**: [Open Cloud Trace Explorer](https://console.cloud.google.com/traces/explorer?project=adk-enterprise-observability)",
             "format": "MARKDOWN"
           }
         }
@@ -22,7 +22,7 @@
         "xPos": 0,
         "yPos": 2,
         "widget": {
-          "title": "Cloud Trace & Telemetry API Span Ingestion Rate",
+          "title": "GCP Observability Pipeline Ingestion Rate (Traces, Metrics & Logs APIs)",
           "xyChart": {
             "dataSets": [
               {
@@ -30,14 +30,13 @@
                 "targetAxis": "Y1",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND resource.type=\"consumed_api\" AND (resource.label.\"service\"=\"telemetry.googleapis.com\" OR resource.label.\"service\"=\"cloudtrace.googleapis.com\")",
+                    "filter": "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND resource.type=\"consumed_api\" AND (resource.label.\"service\"=\"telemetry.googleapis.com\" OR resource.label.\"service\"=\"cloudtrace.googleapis.com\" OR resource.label.\"service\"=\"monitoring.googleapis.com\" OR resource.label.\"service\"=\"logging.googleapis.com\")",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_RATE",
                       "crossSeriesReducer": "REDUCE_SUM",
                       "groupByFields": [
                         "resource.label.\"service\"",
-                        "metric.label.\"method\"",
                         "metric.label.\"response_code\""
                       ]
                     }
@@ -46,7 +45,7 @@
               }
             ],
             "yAxis": {
-              "label": "batches / sec",
+              "label": "requests / sec",
               "scale": "LINEAR"
             }
           }
@@ -93,12 +92,13 @@
         "xPos": 0,
         "yPos": 6,
         "widget": {
-          "title": "Vertex AI API Latency (p95 & p50 by Method)",
+          "title": "Vertex AI API Request Latency (p95 & Mean by Method)",
           "xyChart": {
             "dataSets": [
               {
                 "plotType": "LINE",
                 "targetAxis": "Y1",
+                "legendTemplate": "p95 (${metric.labels.method})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
                     "filter": "metric.type=\"serviceruntime.googleapis.com/api/request_latencies\" AND resource.type=\"consumed_api\" AND resource.label.\"service\"=\"aiplatform.googleapis.com\"",
@@ -106,6 +106,24 @@
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
                       "crossSeriesReducer": "REDUCE_PERCENTILE_95",
+                      "groupByFields": [
+                        "metric.label.\"method\""
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "Mean (${metric.labels.method})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"serviceruntime.googleapis.com/api/request_latencies\" AND resource.type=\"consumed_api\" AND resource.label.\"service\"=\"aiplatform.googleapis.com\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_MEAN",
                       "groupByFields": [
                         "metric.label.\"method\""
                       ]
@@ -127,9 +145,9 @@
         "xPos": 6,
         "yPos": 6,
         "widget": {
-          "title": "Correlated ADK Agent Logs & GenAI Events",
+          "title": "Correlated ADK Agent Logs & Audit Events",
           "logsPanel": {
-            "filter": "logName:(\"adk-otel\" OR \"adk-on-agent-engine\" OR \"reasoning_engine\") OR resource.type=\"aiplatform.googleapis.com/ReasoningEngine\""
+            "filter": "logName:(\"adk-otel\" OR \"adk-on-agent-engine\" OR \"reasoning_engine\" OR \"cloudaudit.googleapis.com\")"
           }
         }
       }

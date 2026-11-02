@@ -11,7 +11,7 @@
         "widget": {
           "title": "Google ADK Enterprise Observability — OpenTelemetry GenAI Metrics",
           "text": {
-            "content": "Visualizes standard **OpenTelemetry GenAI Semantic Convention Metrics** (`workload.googleapis.com/gen_ai.client.token.usage` and `workload.googleapis.com/gen_ai.client.operation.duration`) emitted automatically by `opentelemetry-instrumentation-google-genai` and `google.adk.telemetry.google_cloud.get_gcp_exporters` when `AGENT_ENGINE_TELEMETRY=true` and `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai`.\n\n* **Trace Waterfall**: [Open Cloud Trace Explorer](https://console.cloud.google.com/traces/explorer?project=adk-enterprise-observability) | **Metrics Explorer (PromQL)**: [Open Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?project=adk-enterprise-observability)",
+            "content": "Visualizes standard **OpenTelemetry GenAI Semantic Convention Metrics** (`workload.googleapis.com/gen_ai.client.token.usage` and `workload.googleapis.com/gen_ai.client.operation.duration`) emitted automatically by `opentelemetry-instrumentation-google-genai` and `google.adk.telemetry.google_cloud.get_gcp_exporters` when `AGENT_ENGINE_TELEMETRY=true` and `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai`.\n\n* **Trace Waterfall**: [Open Cloud Trace Explorer](https://console.cloud.google.com/traces/explorer?project=adk-enterprise-observability) | **Metrics Explorer**: [Open Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?project=adk-enterprise-observability)",
             "format": "MARKDOWN"
           }
         }
@@ -22,7 +22,7 @@
         "xPos": 0,
         "yPos": 2,
         "widget": {
-          "title": "GenAI Token Usage by Token Type (input vs output)",
+          "title": "GenAI Mean Tokens per Call by Token Type (input vs output)",
           "xyChart": {
             "dataSets": [
               {
@@ -34,7 +34,7 @@
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_SUM",
+                      "crossSeriesReducer": "REDUCE_MEAN",
                       "groupByFields": [
                         "metric.label.\"gen_ai_token_type\""
                       ]
@@ -44,7 +44,7 @@
               }
             ],
             "yAxis": {
-              "label": "tokens / min",
+              "label": "tokens / call",
               "scale": "LINEAR"
             }
           }
@@ -56,19 +56,39 @@
         "xPos": 6,
         "yPos": 2,
         "widget": {
-          "title": "GenAI Token Usage by Model (gen_ai_request_model)",
+          "title": "GenAI Token Usage by Model (p95 & Mean Tokens)",
           "xyChart": {
             "dataSets": [
               {
                 "plotType": "LINE",
                 "targetAxis": "Y1",
+                "legendTemplate": "Mean ${metric.labels.gen_ai_token_type} (${metric.labels.gen_ai_request_model})",
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
                     "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.token.usage\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
-                      "crossSeriesReducer": "REDUCE_SUM",
+                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai_request_model\"",
+                        "metric.label.\"gen_ai_token_type\""
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "p95 ${metric.labels.gen_ai_token_type} (${metric.labels.gen_ai_request_model})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.token.usage\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_PERCENTILE_95",
                       "groupByFields": [
                         "metric.label.\"gen_ai_request_model\"",
                         "metric.label.\"gen_ai_token_type\""
@@ -79,7 +99,7 @@
               }
             ],
             "yAxis": {
-              "label": "tokens / min",
+              "label": "tokens",
               "scale": "LINEAR"
             }
           }
@@ -91,7 +111,7 @@
         "xPos": 0,
         "yPos": 6,
         "widget": {
-          "title": "GenAI LLM Operation Duration (p95 & p50 Latency)",
+          "title": "GenAI LLM Operation Duration (p95, p50 & Mean Latency)",
           "xyChart": {
             "dataSets": [
               {
@@ -129,6 +149,24 @@
                     }
                   }
                 }
+              },
+              {
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "legendTemplate": "Mean (${metric.labels.gen_ai_request_model})",
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.operation.duration\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_MEAN",
+                      "groupByFields": [
+                        "metric.label.\"gen_ai_request_model\""
+                      ]
+                    }
+                  }
+                }
               }
             ],
             "yAxis": {
@@ -144,7 +182,7 @@
         "xPos": 6,
         "yPos": 6,
         "widget": {
-          "title": "GenAI LLM Call Count by Operation & Model",
+          "title": "GenAI Active Series & Call Activity by Operation & Model",
           "xyChart": {
             "dataSets": [
               {
@@ -155,8 +193,8 @@
                     "filter": "metric.type=\"workload.googleapis.com/gen_ai.client.operation.duration\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
-                      "perSeriesAligner": "ALIGN_COUNT",
-                      "crossSeriesReducer": "REDUCE_SUM",
+                      "perSeriesAligner": "ALIGN_DELTA",
+                      "crossSeriesReducer": "REDUCE_COUNT",
                       "groupByFields": [
                         "metric.label.\"gen_ai_operation_name\"",
                         "metric.label.\"gen_ai_request_model\""
@@ -167,7 +205,7 @@
               }
             ],
             "yAxis": {
-              "label": "LLM calls / min",
+              "label": "active series",
               "scale": "LINEAR"
             }
           }
