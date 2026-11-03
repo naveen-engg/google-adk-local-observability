@@ -102,8 +102,9 @@ Choose your deployment pattern below for full step-by-step instructions, configu
      ```
 2. **[Option 2: Deploy to Google Cloud Run with OpenTelemetry Collector Sidecar](./deploy/cloud_run/README.md)**
    - Uses Cloud Run multi-container sidecar architecture
-   - Runs `otelcol-google` sidecar with PII prompt redaction (`redaction` processor) and `sum` connector
-   - Exports directly to Google Cloud Managed Service for Prometheus (GMP) and Cloud Trace
+   - Runs `otelcol-contrib` sidecar with memory limiter, batching, and Secret Manager credential injection
+   - Exports telemetry over loopback (`127.0.0.1:4318`) to **Dynatrace** (`/api/v2/otlp`) and Google Cloud Observability
+   - Supports scale-to-zero serverless economics with zero static keys
 3. **[Option 3: Enterprise Observability with Dynatrace & GCP Secret Manager](./deploy/dynatrace/README.md)**
    - Stores Dynatrace Environment URL (`dynatrace-env-url`) and API Token (`dynatrace-api-token`) in Google Cloud Secret Manager
    - Resolves credentials dynamically at runtime when `DYNATRACE_ENABLED=true` (both locally and on Vertex AI Agent Engine)

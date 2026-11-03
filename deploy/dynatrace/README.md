@@ -1,6 +1,6 @@
-# Enterprise Observability with Dynatrace, Vertex AI Agent Engine & GCP Secret Manager
+# Enterprise Observability with Dynatrace, Vertex AI Agent Engine & Cloud Run
 
-This directory contains everything needed to export **Google ADK OpenTelemetry GenAI Metrics, Distributed Traces, and Correlated Logs** directly to **Dynatrace** (`/api/v2/otlp`) from both local ADK runners and **Vertex AI Agent Engine**, while storing your Dynatrace URL and API token securely in **Google Cloud Secret Manager** and resolving them dynamically at runtime.
+This directory contains everything needed to export **Google ADK OpenTelemetry GenAI Metrics, Distributed Traces, and Correlated Logs** directly to **Dynatrace** (`/api/v2/otlp`) from local ADK runners, **Vertex AI Agent Engine**, and **Google Cloud Run (Multi-Container Sidecar)**, while storing your Dynatrace URL and API token securely in **Google Cloud Secret Manager** and resolving them dynamically at runtime.
 
 ---
 
@@ -8,11 +8,17 @@ This directory contains everything needed to export **Google ADK OpenTelemetry G
 
 ```mermaid
 flowchart LR
-    SM["Google Cloud Secret Manager\n(dynatrace-env-url &\ndynatrace-api-token)"] -->|Fetched at Runtime via IAM\nroles/secretmanager.secretAccessor| Agent["Vertex AI Agent Engine / ADK OpsAgent\n(google-adk[otel]>=2.13.0)"]
+    SM["Google Cloud Secret Manager\n(dynatrace-env-url &\ndynatrace-api-token)"] -->|Runtime IAM Fetch| Deployments
+
+    subgraph Deployments["Supported Deployment Runtimes"]
+        D1["Vertex AI Agent Engine\n(AdkApp / Reasoning Engine)"]
+        D2["Google Cloud Run\n(Multi-Container OTel Sidecar)"]
+        D3["Local ADK Runner\n(CLI / Dev UI)"]
+    end
     
-    Agent -->|OTLP HTTP /v1/metrics\nTemporality: DELTA| DTM["Dynatrace Metrics Ingest\n(7x gen_ai.* histograms)"]
-    Agent -->|OTLP HTTP /v1/traces| DTT["Dynatrace Distributed Tracing\n(invoke_agent, call_llm, execute_tool)"]
-    Agent -->|OTLP HTTP /v1/logs| DTL["Dynatrace Grail Logs & Events\n(Correlated via trace_id / span_id)"]
+    Deployments -->|OTLP HTTP /v1/metrics\nTemporality: DELTA| DTM["Dynatrace Metrics Ingest\n(7x gen_ai.* histograms)"]
+    Deployments -->|OTLP HTTP /v1/traces| DTT["Dynatrace Distributed Tracing\n(invoke_agent, call_llm, execute_tool)"]
+    Deployments -->|OTLP HTTP /v1/logs| DTL["Dynatrace Grail Logs & Events\n(Correlated via trace_id / span_id)"]
 
     DTM --> Dash1["Dashboard 1:\nADK GenAI Metrics & Token Analytics\n(5443daae-e753-49b5-94ed-32d48b707e23)"]
     DTT --> Dash2["Dashboard 2:\nADK Distributed Traces, Spans & Logs\n(575caaa3-b37f-4489-8b24-218aa0ac0118)"]

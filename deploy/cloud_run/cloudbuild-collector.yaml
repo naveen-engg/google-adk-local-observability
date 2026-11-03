@@ -1,0 +1,18 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["pull", "otel/opentelemetry-collector-contrib:0.120.0"]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "tag",
+        "otel/opentelemetry-collector-contrib:0.120.0",
+        "us-central1-docker.pkg.dev/adk-enterprise-observability/adk-agents/otel-collector:latest",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "us-central1-docker.pkg.dev/adk-enterprise-observability/adk-agents/otel-collector:latest",
+      ]
+images:
+  - "us-central1-docker.pkg.dev/adk-enterprise-observability/adk-agents/otel-collector:latest"

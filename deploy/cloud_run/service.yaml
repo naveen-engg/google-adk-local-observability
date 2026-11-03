@@ -1,0 +1,90 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: adk-ops-agent
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/startup-cpu-boost: "true"
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "3"
+    spec:
+      serviceAccountName: adk-agent-engine-sa@adk-enterprise-observability.iam.gserviceaccount.com
+      containers:
+        # Container 1: Ingress Google ADK Agent (Port 8000)
+        - name: adk-agent
+          image: us-central1-docker.pkg.dev/adk-enterprise-observability/adk-agents/adk-ops-agent:latest
+          ports:
+            - name: http1
+              containerPort: 8000
+          env:
+            - name: GOOGLE_GENAI_USE_VERTEXAI
+              value: "1"
+            - name: GOOGLE_CLOUD_PROJECT
+              value: "adk-enterprise-observability"
+            - name: GOOGLE_CLOUD_LOCATION
+              value: "global"
+            - name: ADK_VERTEX_LOCATION
+              value: "global"
+            - name: ADK_MODEL
+              value: "gemini-3.5-flash"
+            - name: OTEL_SERVICE_NAME
+              value: "adk-ops-agent"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://127.0.0.1:4318"
+            - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+              value: "delta"
+            - name: OTEL_SEMCONV_STABILITY_OPT_IN
+              value: "gen_ai_latest_experimental"
+            - name: OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT
+              value: "EVENT_ONLY"
+            - name: OTEL_METRIC_EXPORT_INTERVAL
+              value: "3000"
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          startupProbe:
+            failureThreshold: 1
+            periodSeconds: 240
+            tcpSocket:
+              port: 8000
+            timeoutSeconds: 240
+
+        # Container 2: OpenTelemetry Collector Sidecar (Receives :4318 -> Exports to Dynatrace)
+        - name: otel-collector
+          image: us-central1-docker.pkg.dev/adk-enterprise-observability/adk-agents/otel-collector:latest
+          args:
+            - "--config=/etc/otelcol/config.yaml"
+          env:
+            - name: DT_ENV_URL
+              valueFrom:
+                secretKeyRef:
+                  name: dynatrace-env-url
+                  key: latest
+            - name: DT_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: dynatrace-api-token
+                  key: latest
+          volumeMounts:
+            - name: otel-config
+              mountPath: /etc/otelcol
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+      volumes:
+        - name: otel-config
+          secret:
+            secretName: otel-collector-dynatrace-config
+            items:
+              - key: latest
+                path: config.yaml

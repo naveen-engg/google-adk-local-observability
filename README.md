@@ -339,7 +339,8 @@ We are scaling this local developer stack into distributed production **Google C
 
 - 📘 **[Enterprise GCP Deployment Overview (`ENTERPRISE_GCP_DEPLOYMENT.md`)](./ENTERPRISE_GCP_DEPLOYMENT.md)** — Architecture comparison, required GCP APIs, and least-privilege IAM roles.
 - 🧠 **[Option 1: Vertex AI Agent Engine / Reasoning Engine (`deploy/agent_engine/README.md`)](./deploy/agent_engine/README.md)** — Managed ADK runtime (`AdkApp`) with native Cloud Trace & Cloud Monitoring OpenTelemetry exporters.
-- 🚀 **[Option 2: Google Cloud Run + OpenTelemetry Collector Sidecar (`deploy/cloud_run/README.md`)](./deploy/cloud_run/README.md)** — Serverless multi-container deployment with `otelcol-google` sidecar, PII prompt redaction, and Managed Service for Prometheus (GMP).
+- 🚀 **[Option 2: Google Cloud Run + OpenTelemetry Collector Sidecar (`deploy/cloud_run/README.md`)](./deploy/cloud_run/README.md)** — Serverless multi-container deployment with OpenTelemetry Collector sidecar exporting to Dynatrace and Google Cloud Observability.
+- 📈 **[Option 3: Enterprise Observability with Dynatrace & GCP Secret Manager (`deploy/dynatrace/README.md`)](./deploy/dynatrace/README.md)** — Export all 7 GenAI histogram metrics and distributed trace waterfalls directly to Dynatrace with runtime credential injection from Secret Manager.
 - 🛡️ **Enterprise Security & FinOps**: Workload Identity IAM authentication, Secret Manager config mounting, Identity-Aware Proxy (IAP), and BigQuery token chargeback analytics.
 
 ---
