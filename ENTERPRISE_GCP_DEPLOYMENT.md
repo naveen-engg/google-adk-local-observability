@@ -125,6 +125,10 @@ Provisioned via [`deploy/gcp_dashboards/adk-genai-gcp-dashboard.json`](./deploy/
 Provisioned via [`deploy/gcp_dashboards/adk-traces-gcp-dashboard.json`](./deploy/gcp_dashboards/adk-traces-gcp-dashboard.json):
 ![GCP Cloud Trace & Monitoring Dashboard](./docs/media/gcp_monitoring_traces_dashboard.png)
 
+### 3. Google Cloud Run — ADK Web Dev UI & Multi-Container SRE Copilot
+Interactive web UI served directly by Cloud Run at `https://adk-ops-agent-981754278786.us-central1.run.app/dev-ui/?app=ops_agent`:
+![Google ADK Web UI on Cloud Run](./docs/media/cloud_run_adk_web_ui.png)
+
 ---
 
 ## Live Dynatrace Enterprise Observability Showcase (`voy39934`)

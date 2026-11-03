@@ -132,9 +132,24 @@ gcloud run services replace deploy/cloud_run/service.yaml \
 
 ---
 
-## 4. Traffic Simulation (`simulate_cloud_run.py`)
+## 4. Web UI Interface & Live Chat (`https://adk-ops-agent-981754278786.us-central1.run.app/`)
 
-Run the automated SRE diagnostic suite against the deployed Cloud Run agent:
+The Cloud Run deployment serves the full interactive **Google ADK Web Dev UI** on the root `/` endpoint (redirects to `/dev-ui/?app=ops_agent`). It supports real-time streaming, interactive chat, tool inspection, session management, and the visual agent graph.
+
+### Live Cloud Run ADK Web UI Snapshot:
+![Google ADK Web UI on Cloud Run](../../docs/media/cloud_run_adk_web_ui.png)
+
+### Automated UI Simulation & Screenshot (`capture_ui_screenshot.py`)
+To test the web interface end-to-end headlessly and capture snapshots:
+```bash
+py -3.13 deploy/cloud_run/capture_ui_screenshot.py
+```
+
+---
+
+## 5. CLI Traffic Simulation (`simulate_cloud_run.py`)
+
+Run the automated multi-tool SRE diagnostic test suite against the deployed Cloud Run agent:
 
 ```bash
 py -3.13 deploy/cloud_run/simulate_cloud_run.py
@@ -153,9 +168,9 @@ The script:
 
 ---
 
-## 5. Live Dynatrace Observability Snapshots (`voy39934`)
+## 6. Live Dynatrace Observability Snapshots (`voy39934`)
 
-### 5.1 Google ADK — GenAI Metrics & Token Analytics
+### 6.1 Google ADK — GenAI Metrics & Token Analytics
 Visualizes all 7 OpenTelemetry GenAI histogram metrics (`gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, `gen_ai.execute_tool.duration`, `gen_ai.invoke_agent.duration`, `gen_ai.invoke_agent.inference_calls`, `gen_ai.invoke_agent.tool_calls`, `gen_ai.invoke_workflow.duration`) emitted with `DELTA` temporality:
 
 ![Dynatrace GenAI Metrics & Token Analytics Dashboard](../../docs/media/dynatrace_genai_metrics_dashboard.png)

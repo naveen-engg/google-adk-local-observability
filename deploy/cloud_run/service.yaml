@@ -17,7 +17,7 @@ spec:
       containers:
         # Container 1: Ingress Google ADK Agent (Port 8000)
         - name: adk-agent
-          image: us-central1-docker.pkg.dev/adk-enterprise-observability/adk-agents/adk-ops-agent:latest
+          image: us-central1-docker.pkg.dev/adk-enterprise-observability/adk-agents/adk-ops-agent@sha256:4e166d6ea4e275cd7eab98d58ce040bf366a5344beffa4139cb326650b309302
           ports:
             - name: http1
               containerPort: 8000
